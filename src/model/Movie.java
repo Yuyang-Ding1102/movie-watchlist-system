@@ -1,10 +1,10 @@
-package src.model;
+package model;
 
 public class Movie {
     private String title;
     private String genre;
-    private String status; // "Watched" or "Not Watched"
-    private double rating; // 0.0 to 10.0
+    private String status;
+    private double rating;
 
     public Movie(String title, String genre, String status, double rating) {
         this.title = title;
@@ -13,31 +13,13 @@ public class Movie {
         this.rating = rating;
     }
 
-    // Getters
-    public String getTitle() {
-        return title;
-    }
+    public String getTitle() { return title; }
+    public String getGenre() { return genre; }
+    public String getStatus() { return status; }
+    public double getRating() { return rating; }
 
-    public String getGenre() {
-        return genre;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public double getRating() {
-        return rating;
-    }
-
-    // Setters
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
+    public void setStatus(String status) { this.status = status; }
+    public void setRating(double rating) { this.rating = rating; }
 
     @Override
     public String toString() {
