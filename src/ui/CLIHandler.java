@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Scanner;
 import model.Movie;
 import service.MovieManager;
+import service.StatisticsService;
 import storage.StorageService;
 
 public class CLIHandler {
@@ -11,14 +12,16 @@ public class CLIHandler {
 
     private final MovieManager movieManager;
     private final StorageService storage;
+    private final StatisticsService stats;
     private final Scanner scanner;
 
     public CLIHandler() {
         this.movieManager = new MovieManager();
         this.storage = new StorageService();
+        this.stats = new StatisticsService();
         this.scanner = new Scanner(System.in);
 
-        // auto-load on startup
+        // auto-load on startup (silently)
         loadFromDisk(false);
     }
 
@@ -36,6 +39,7 @@ public class CLIHandler {
                 case "6" -> sortMoviesByRating();
                 case "7" -> saveToDisk(true);
                 case "8" -> loadFromDisk(true);
+                case "9" -> viewStatistics();
                 case "0" -> {
                     saveToDisk(false); // auto-save on exit
                     running = false;
@@ -56,6 +60,7 @@ public class CLIHandler {
         System.out.println("6. Sort movies by rating");
         System.out.println("7. Save to CSV");
         System.out.println("8. Load from CSV");
+        System.out.println("9. View statistics");
         System.out.println("0. Exit");
         System.out.print("Choose an option: ");
     }
@@ -63,15 +68,18 @@ public class CLIHandler {
     private void addMovie() {
         System.out.print("Title: ");
         String title = scanner.nextLine().trim();
+
         System.out.print("Genre: ");
         String genre = scanner.nextLine().trim();
+
         System.out.print("Status (Watched/Not Watched): ");
         String status = scanner.nextLine().trim();
+
         System.out.print("Rating (0.0 - 10.0): ");
         double rating = readDoubleOrDefault(0.0);
 
         movieManager.addMovie(new Movie(title, genre, status, rating));
-        System.out.println("Movie added.");
+        System.out.println("✔ Movie added.");
     }
 
     private void viewAllMovies() {
@@ -88,7 +96,7 @@ public class CLIHandler {
         System.out.print("Enter title to delete: ");
         String title = scanner.nextLine().trim();
         boolean ok = movieManager.deleteMovie(title);
-        System.out.println(ok ? "Movie deleted." : "Movie not found.");
+        System.out.println(ok ? "✔ Movie deleted." : "✖ Movie not found.");
     }
 
     private void editMovie() {
@@ -104,7 +112,7 @@ public class CLIHandler {
         Double newRating = r.isEmpty() ? null : parseDoubleOrNull(r);
 
         boolean ok = movieManager.editMovie(title, newStatus, newRating);
-        System.out.println(ok ? "Movie updated." : "Movie not found.");
+        System.out.println(ok ? "✔ Movie updated." : "✖ Movie not found.");
     }
 
     private void filterByGenre() {
@@ -123,7 +131,17 @@ public class CLIHandler {
         System.out.print("Sort descending? (yes/no): ");
         boolean desc = scanner.nextLine().trim().equalsIgnoreCase("yes");
         movieManager.sortByRating(desc);
-        System.out.println("Movies sorted by rating " + (desc ? "descending." : "ascending."));
+        System.out.println("✔ Movies sorted by rating " + (desc ? "descending." : "ascending."));
+    }
+
+    // ---------- Statistics ----------
+
+    private void viewStatistics() {
+        var s = stats.compute(movieManager.getAllMovies());
+        System.out.println("\n=== Statistics ===");
+        System.out.printf("Total movies: %d%n", s.total);
+        System.out.printf("Watched: %d%n", s.watched);
+        System.out.printf("Average rating (rated only): %.2f%n", s.avgRating);
     }
 
     // ---------- Persistence helpers ----------
@@ -131,7 +149,7 @@ public class CLIHandler {
     private void saveToDisk(boolean verbose) {
         try {
             storage.save(DATA_PATH, movieManager.getAllMovies());
-            if (verbose) System.out.println("Saved to " + DATA_PATH);
+            if (verbose) System.out.println("✔ Saved to " + DATA_PATH);
         } catch (Exception e) {
             System.out.println("Save failed: " + e.getMessage());
         }
@@ -139,10 +157,11 @@ public class CLIHandler {
 
     private void loadFromDisk(boolean verbose) {
         try {
+            storage.ensureFile(DATA_PATH);
             var loaded = storage.load(DATA_PATH);
             movieManager.getAllMovies().clear();
             movieManager.getAllMovies().addAll(loaded);
-            if (verbose) System.out.println("Loaded " + loaded.size() + " movies from " + DATA_PATH);
+            if (verbose) System.out.println("✔ Loaded " + loaded.size() + " movies from " + DATA_PATH);
         } catch (Exception e) {
             if (verbose) System.out.println("Load failed: " + e.getMessage());
         }
@@ -160,3 +179,4 @@ public class CLIHandler {
         try { return Double.parseDouble(s); } catch (Exception ignored) { return null; }
     }
 }
+
