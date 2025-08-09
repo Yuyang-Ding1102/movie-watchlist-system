@@ -2,6 +2,7 @@ package ui;
 
 import java.util.List;
 import java.util.Scanner;
+
 import model.Movie;
 import service.MovieManager;
 import service.StatisticsService;
@@ -21,7 +22,7 @@ public class CLIHandler {
         this.stats = new StatisticsService();
         this.scanner = new Scanner(System.in);
 
-        loadFromDisk(false);
+        loadFromDisk(true);
     }
 
     public void run() {
@@ -41,7 +42,7 @@ public class CLIHandler {
                 case "9" -> viewStatistics();
                 case "10" -> markMovieAsWatched();
                 case "0" -> {
-                    saveToDisk(false);
+                    saveToDisk(true);
                     running = false;
                 }
                 default -> System.out.println("Invalid choice.");
