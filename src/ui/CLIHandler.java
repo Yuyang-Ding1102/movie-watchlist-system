@@ -21,7 +21,6 @@ public class CLIHandler {
         this.stats = new StatisticsService();
         this.scanner = new Scanner(System.in);
 
-        // auto-load on startup (silently)
         loadFromDisk(false);
     }
 
@@ -40,8 +39,9 @@ public class CLIHandler {
                 case "7" -> saveToDisk(true);
                 case "8" -> loadFromDisk(true);
                 case "9" -> viewStatistics();
+                case "10" -> markMovieAsWatched();
                 case "0" -> {
-                    saveToDisk(false); // auto-save on exit
+                    saveToDisk(false);
                     running = false;
                 }
                 default -> System.out.println("Invalid choice.");
@@ -61,6 +61,7 @@ public class CLIHandler {
         System.out.println("7. Save to CSV");
         System.out.println("8. Load from CSV");
         System.out.println("9. View statistics");
+        System.out.println("10. Mark movie as Watched");
         System.out.println("0. Exit");
         System.out.print("Choose an option: ");
     }
@@ -135,7 +136,6 @@ public class CLIHandler {
     }
 
     // ---------- Statistics ----------
-
     private void viewStatistics() {
         var s = stats.compute(movieManager.getAllMovies());
         System.out.println("\n=== Statistics ===");
@@ -144,8 +144,7 @@ public class CLIHandler {
         System.out.printf("Average rating (rated only): %.2f%n", s.avgRating);
     }
 
-    // ---------- Persistence helpers ----------
-
+    // ---------- Persistence ----------
     private void saveToDisk(boolean verbose) {
         try {
             storage.save(DATA_PATH, movieManager.getAllMovies());
@@ -167,8 +166,7 @@ public class CLIHandler {
         }
     }
 
-    // ---------- small utils ----------
-
+    // ---------- utils ----------
     private double readDoubleOrDefault(double defVal) {
         String s = scanner.nextLine().trim();
         Double v = parseDoubleOrNull(s);
@@ -178,5 +176,14 @@ public class CLIHandler {
     private Double parseDoubleOrNull(String s) {
         try { return Double.parseDouble(s); } catch (Exception ignored) { return null; }
     }
+    
+    private void markMovieAsWatched() {
+        System.out.print("Enter title to mark as Watched: ");
+        String title = scanner.nextLine().trim();
+        boolean ok = movieManager.markAsWatched(title);
+        System.out.println(ok ? "✔ Marked as Watched." : "✖ Movie not found.");
+    }
+    
 }
+
 
