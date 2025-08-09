@@ -1,0 +1,21 @@
+# Java compiled class files
+*.class
+
+# Build output directories
+bin/
+out/
+target/
+
+# IDE configuration files
+*.iml
+.idea/
+.vscode/
+.classpath
+.project
+.settings/
+
+# macOS system files
+.DS_Store
+
+# Logs
+*.log
